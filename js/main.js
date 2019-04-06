@@ -35,13 +35,16 @@
     function searchForRearCamera() {
         var deferred = new $.Deferred();
 
-        //MediaStreamTrack.getSources seams to be supported only by Chrome
-        if (MediaStreamTrack && MediaStreamTrack.getSources) {
-            MediaStreamTrack.getSources(function (sources) {
+        // MediaStreamTrack.getSources is deprecated https://www.chromestatus.com/feature/4765305641369600
+        // https://github.com/kdzwinel/JS-OCR-demo/issues/7
+        // use navigator.mediaDevices.enumerateDevices instead. https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.enumerateDevices()
+            .then(function (sources) {
                 var rearCameraIds = sources.filter(function (source) {
-                    return (source.kind === 'video' && source.facing === 'environment');
+                    return (source.kind === 'videoinput' && source.label.toLowerCase().indexOf('back') !== -1);
                 }).map(function (source) {
-                    return source.id;
+                    return source.deviceId;
                 });
 
                 if (rearCameraIds.length) {
